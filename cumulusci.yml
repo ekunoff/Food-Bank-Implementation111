@@ -4,9 +4,9 @@ project:
     package:
         name:  Food-Bank-Implementation
         api_version: '48.0'
-    dependencies:
-        - github: 'https://github.com/SalesforceFoundation/NPSP'
-        - github: 'https://github.com/ekunoff/Food-Bank'
+    dependencies:
+      - github: 'https://github.com/SalesforceFoundation/NPSP'
+      - github: 'https://github.com/ekunoff/Food-Bank-Implementation.git'
     source_format: sfdx
 
 tasks:
