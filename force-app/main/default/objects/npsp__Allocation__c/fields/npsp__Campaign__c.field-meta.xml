@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>npsp__Campaign__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <deprecated>false</deprecated>
+    <description>The Campaign associated with this Allocation. Use this field if you want new Opportunities associated with this Campaign to be allocated in the same way.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Die mit dieser Zuordnung verbundene Kampagne. Verwenden Sie dieses Feld, wenn Sie möchten, dass neue mit dieser Kampagne verbundene Opportunities in derselben Weise zugeordnet werden sollen.</inlineHelpText>
+    <label>Campaign</label>
+    <referenceTo>Campaign</referenceTo>
+    <relationshipLabel>GAU Allocations</relationshipLabel>
+    <relationshipName>Allocations</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>
