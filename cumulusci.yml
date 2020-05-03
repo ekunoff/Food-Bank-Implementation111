@@ -21,9 +21,3 @@ tasks:
 sources:
     npsp:
         github: https://github.com/SalesforceFoundation/NPSP
-
-flows:
-    dependencies:
-        steps:
-            3:
-                flow: npsp:config_managed
