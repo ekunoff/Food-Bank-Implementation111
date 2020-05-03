@@ -1,0 +1,33 @@
+{
+    "orgName": "Program Management Data Model - Dev Org",
+    "edition": "Developer",
+    "settings": {
+        "lightningExperienceSettings": {
+            "enableS1DesktopEnabled": true
+        },
+        "chatterSettings": {
+            "enableChatter": true
+        },
+        "languageSettings": {
+            "enableTranslationWorkbench": true
+        },
+        "mobileSettings": {
+            "enableS1EncryptedStoragePref2": false
+        },
+        "enhancedNotesSettings": {
+            "enableEnhancedNotes": true
+        },
+        "pathAssistantSettings": {
+            "pathAssistantEnabled": true
+        },
+        "userManagementSettings": {
+            "enableNewProfileUI": true
+        },
+        "securitySettings": {
+            "enableAdminLoginAsAnyUser": true,
+            "sessionSettings": {
+                "forceRelogin": false
+            }
+        }
+    }
+}

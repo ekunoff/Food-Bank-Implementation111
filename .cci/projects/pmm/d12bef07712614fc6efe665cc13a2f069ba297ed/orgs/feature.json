@@ -1,0 +1,30 @@
+{
+    "orgName": "Program Management Data Model - Feature Test Org",
+    "edition": "Developer",
+    "settings": {
+        "lightningExperienceSettings": {
+            "enableS1DesktopEnabled": true
+        },
+        "chatterSettings": {
+            "enableChatter": true
+        },
+        "languageSettings": {
+            "enableTranslationWorkbench": true
+        },
+        "enhancedNotesSettings": {
+            "enableEnhancedNotes": true
+        },
+        "pathAssistantSettings": {
+            "pathAssistantEnabled": true
+        },
+        "userManagementSettings": {
+            "enableNewProfileUI": true
+        },
+        "securitySettings": {
+            "enableAdminLoginAsAnyUser": true,
+            "sessionSettings": {
+                "forceRelogin": false
+            }
+        }
+    }
+}

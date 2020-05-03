@@ -1,0 +1,309 @@
+minimum_cumulusci_version: "2.5.9"
+project:
+    name: PMM
+    package:
+        name: Program Management Module
+        namespace: pmdm
+        api_version: "46.0"
+        install_class: InstallScript
+    source_format: sfdx
+    git:
+        repo_url: https://github.com/SalesforceFoundation/PMM
+        prefix_beta: uat/
+        prefix_release: release/
+    dependencies:
+        - github: https://github.com/SalesforceFoundation/sfdo-base
+orgs:
+    scratch:
+        dev_namespaced:
+            config_file: orgs/dev.json
+            days: 7
+            namespaced: True
+        prerelease:
+            config_file: orgs/prerelease.json
+            days: 7
+
+sources:
+    npsp:
+        github: https://github.com/SalesforceFoundation/NPSP
+
+tasks:
+    inject_namespaced_org_flow:
+        description: "Selectively inject namespace references into Flow metadata"
+        class_path: cumulusci.tasks.util.FindReplace
+        options:
+            path: force-app/main/default/flows
+            find: "%%%NAMESPACE%%%"
+            replace: "pmdm__"
+            file_pattern: "*"
+
+    clear_namespaced_org_flow:
+        description: "Selectively inject namespace references into Flow metadata"
+        class_path: cumulusci.tasks.util.FindReplace
+        options:
+            path: force-app/main/default/flows
+            find: "%%%NAMESPACE%%%"
+            replace: ""
+            file_pattern: "*"
+
+    source_revert:
+        description: "Preserve the source so it can be modified during deployment"
+        class_path: tasks.GenericSrcRevert.GenericSrcRevert
+        options:
+            path: force-app/main/default/flows
+            revert_path: force-app-bak
+
+    cache_namespaces_in_org_config:
+        description: Caches namespaces information in org_config
+        class_path: tasks.namespaces.CacheNamespaces
+        group: Namespaces
+
+    robot:
+        options:
+            suites: robot/pmm/tests
+            options:
+                outputdir: robot/pmm/results
+
+    robot_testdoc:
+        options:
+            path: robot/pmm/tests
+            output: robot/pmm/doc/pmm_tests.html
+
+    robot_libdoc:
+        options:
+            path: robot/pmm/resources/pmm.py,robot/pmm/resources/pmm.robot,robot/pmm/resources/*PageObject.py
+            output: robot/pmm/doc/Keywords.html
+
+    update_admin_profile:
+        options:
+            package_xml: lib/admin_profile.xml
+
+    update_admin_profile_npsp:
+        class_path: cumulusci.tasks.salesforce.UpdateAdminProfile
+        options:
+            package_xml: lib/npsp_admin_profile.xml
+            record_types:
+                - record_type: Account.HH_Account
+                - record_type: Account.Organization
+                  default: true
+                  person_account_default: true
+                - record_type: Opportunity.Donation
+                  default: true
+                - record_type: Campaign.Default
+                  default: true
+
+    run_all_local_tests:
+        group: "Tests"
+        description: "Runs all local Apex Tests including code coverage"
+        class_path: cumulusci.tasks.sfdx.SFDXOrgTask
+        options:
+            command: "force:apex:test:run --codecoverage --testlevel RunLocalTests --resultformat human"
+
+    run_tests:
+        options:
+            retry_failures:
+                - "unable to obtain exclusive access to this record"
+                - "UNABLE_TO_LOCK_ROW"
+            retry_always: True
+
+    disable_npsp_triggers:
+        class_path: cumulusci.tasks.salesforce.trigger_handlers.SetTDTMHandlerStatus
+        description: "Disable all NPSP Trigger Handlers"
+        options:
+            active: False
+            namespace: npsp
+            restore_file: trigger_status.yml
+
+    restore_npsp_triggers:
+        class_path: cumulusci.tasks.salesforce.trigger_handlers.SetTDTMHandlerStatus
+        description: "Restore all NPSP Trigger Handlers"
+        options:
+            restore: True
+            namespace: npsp
+            restore_file: trigger_status.yml
+
+    dx:
+        group: "Salesforce DX"
+        description: "Calls a sfdx task with the cci Org User specificed.  Enter the sfdx task with the command option"
+        class_path: cumulusci.tasks.sfdx.SFDXOrgTask
+
+    dx_status:
+        group: "Salesforce DX"
+        description: "Calls sfdx force:source:status for cci Org User"
+        class_path: cumulusci.tasks.sfdx.SFDXOrgTask
+        options:
+            command: "force:source:status"
+
+    log_bulk_data_mapping:
+        group: "Data: Bulk"
+        description: "Generates a combined mapping configuration for cumulusci.tasks.bulkdata"
+        class_path: tasks.BulkData.LogMapping
+        options:
+            package_mapping_directories:
+                - data/bulk/mapping/npsp
+                - data/bulk/mapping/pmdm
+            pre_mapping_configs:
+                - path: data/bulk/mapping/Household_Accounts.yml
+                - path: data/bulk/mapping/Organization_Accounts.yml
+                - path: data/bulk/mapping/Contacts.yml
+            log_mapping: table
+
+    insert_bulk_data:
+        group: "Data: Bulk"
+        description: "Inserts bulk data at sql_path into org with auto-generated mapping"
+        class_path: tasks.BulkData.InsertData
+        options:
+            sql_path: data/bulk/data.sql
+            ignore_row_errors: True
+            package_mapping_directories:
+                - data/bulk/mapping/npsp
+                - data/bulk/mapping/pmdm
+            pre_mapping_configs:
+                - path: data/bulk/mapping/Household_Accounts.yml
+                - path: data/bulk/mapping/Organization_Accounts.yml
+                - path: data/bulk/mapping/Contacts.yml
+
+    uninstall_packaged_incremental:
+        description: Deletes any metadata from the package in the target org not in the local workspace
+        class_path: cumulusci.tasks.salesforce.UninstallPackagedIncremental
+        options:
+            ignore:
+                QuickAction:
+                    - NewEvent
+                    - NewCase
+                    - NewLead
+                    - NewContact
+                    - NewOpportunity
+                    - NewTask
+                    - LogACall
+
+    deploy_service_delivery_modal_test:
+        group: "PMM: Tests"
+        description: Deploys a testModal component to test serviceDeliveryModal component
+        class_path: cumulusci.tasks.salesforce.Deploy
+        options:
+            path: unpackaged/tests/serviceDeliveryModal
+            namespace_inject: $project_config.project__package__namespace
+
+    deploy_dev_config:
+        group: "PMM: Config"
+        description: Deploys the post-install configuration for an unmanaged DE org
+        class_path: cumulusci.tasks.salesforce.Deploy
+        options:
+            path: unpackaged/config/dev
+            namespace_inject: $project_config.project__package__namespace
+
+    deploy_customer_profiles:
+        group: "PMM: Config"
+        description: Deploys the post-install configuration for an unmanaged DE org
+        class_path: cumulusci.tasks.salesforce.Deploy
+        options:
+            path: unpackaged/config/customer_profiles
+            namespace_inject: $project_config.project__package__namespace
+
+flows:
+    capture_bulk_data:
+        steps:
+            100:
+                task: capture_bulk_data
+            200:
+                task: update_client_photo_directories
+
+    insert_data:
+        steps:
+            1:
+                task: cache_namespaces_in_org_config
+            2:
+                task: disable_npsp_triggers
+                when: "'npsp' in org_config.namespace_info.namespaces"
+            3:
+                task: insert_bulk_data
+            4:
+                task: restore_npsp_triggers
+                when: "'npsp' in org_config.namespace_info.namespaces"
+            5:
+                task: execute_anon
+                options:
+                    path: "data/scripts/update_all_records_as_recently_viewed.apex"
+
+    config_unmanaged:
+        steps:
+            3:
+                flow: insert_data
+
+    config_managed:
+        steps:
+            3:
+                flow: insert_data
+            4:
+                task: deploy_customer_profiles
+                options:
+                    unmanaged: False
+
+    config_qa:
+        steps:
+            200:
+                flow: config_unmanaged
+            201:
+                task: deploy_dev_config
+            202:
+                task: deploy_customer_profiles
+
+    config_dev:
+        steps:
+            200:
+                flow: config_unmanaged
+            201:
+                task: deploy_dev_config
+            202:
+                task: deploy_customer_profiles
+
+    config_regression:
+        steps:
+            0.5:
+                flow: install_npsp
+
+    install_npsp:
+        steps:
+            1:
+                flow: npsp:install_prod
+    deploy_unmanaged:
+        steps:
+            2.98:
+                task: source_revert
+                options:
+                    revert: False
+            2.99:
+                task: inject_namespaced_org_flow
+                when: org_config.namespaced
+            2.999:
+                task: clear_namespaced_org_flow
+                when: not org_config.namespaced
+            4.099:
+                task: source_revert
+                options:
+                    revert: True
+
+    deploy_packaging:
+        steps:
+            3.01:
+                task: inject_namespaced_org_flow
+                options:
+                    path: "src/flows"
+plans:
+    install:
+        slug: install
+        title: Install Program Management Module
+        tier: primary
+        is_listed: True
+        steps:
+            1:
+                task: update_dependencies
+            2:
+                task: install_managed
+            3:
+                task: deploy_customer_profiles
+                ui_options:
+                    name: "Deploy Program Management Profile"
+                options:
+                    unmanaged: False

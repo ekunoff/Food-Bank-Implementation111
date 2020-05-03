@@ -1,0 +1,31 @@
+{
+    "orgName": "Program Management Data Model - Prerelease Dev Org",
+    "edition": "Developer",
+    "instance": "cs46",
+    "settings": {
+        "lightningExperienceSettings": {
+            "enableS1DesktopEnabled": true
+        },
+        "chatterSettings": {
+            "enableChatter": true
+        },
+        "languageSettings": {
+            "enableTranslationWorkbench": true
+        },
+        "enhancedNotesSettings": {
+            "enableEnhancedNotes": true
+        },
+        "pathAssistantSettings": {
+            "pathAssistantEnabled": true
+        },
+        "userManagementSettings": {
+            "enableNewProfileUI": true
+        },
+        "securitySettings": {
+            "enableAdminLoginAsAnyUser": true,
+            "sessionSettings": {
+                "forceRelogin": false
+            }
+        }
+    }
+}
