@@ -6,7 +6,7 @@ project:
         api_version: '48.0'
     dependencies:
       - github: 'https://github.com/SalesforceFoundation/NPSP'
-      - github: 'https://github.com/YourGitHubUsername/Food-Bank'
+      - github: 'https://github.com/ekunoff/Food-Bank-Implementation.git'
     source_format: sfdx
 
 tasks:
