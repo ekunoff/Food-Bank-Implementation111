@@ -21,9 +21,11 @@ tasks:
         options:
             path: robot/Food-Bank-Implementation/tests
             output: robot/Food-Bank-Implementation/doc/Food-Bank-Implementation_tests.html
+
 sources:
     npsp:
         github: https://github.com/SalesforceFoundation/NPSP
+
 flows:
     dependencies:
         steps:
